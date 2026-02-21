@@ -20,6 +20,10 @@ Sorting Hat — A Harry Potter-themed house sorting experience on first visit, w
 
 Persistent storage — All statuses and custom sets are saved in your browser's local storage, so your collection is remembered between visits
 
+Known Limitations
+
+Pricing is not real — the "From (US)" price shown in set detail popups is a placeholder value calculated from piece count and set number. It is not live market data and should not be used for purchasing decisions.
+
 Tech Stack
 
 Vanilla HTML, CSS, and JavaScript — no frameworks, no build tools
