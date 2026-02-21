@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🧙 Lego Collection Tracker</title>
+<title>Lego Collection Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
@@ -134,17 +134,28 @@ header::before {
   pointer-events: none;
 }
 .header-inner { position: relative; }
-.header-crest { font-size: 2.4rem; line-height: 1; margin-bottom: 5px; filter: drop-shadow(0 0 12px var(--th-primary-glow)); transition: filter 0.7s; }
+
+/* Header crest — now an <img> instead of an emoji span */
+.header-crest {
+  width: 72px; height: 72px;
+  margin: 0 auto 8px;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px var(--th-primary-glow));
+  transition: filter 0.7s;
+}
+
 header h1 { font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 700; color: var(--th-primary); letter-spacing: 0.08em; text-shadow: 0 0 20px var(--th-primary-glow), 0 2px 4px rgba(0,0,0,0.8); margin-bottom: 3px; transition: color 0.7s; }
 header p { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.85rem; color: var(--th-text-muted); letter-spacing: 0.05em; transition: color 0.7s; }
 .header-resort-btn {
-  margin-top: 10px; display: inline-block;
+  margin-top: 10px; display: inline-flex; align-items: center; gap: 6px;
   font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.06em;
   color: var(--th-text-muted); background: none;
   border: 1px solid var(--th-border); border-radius: 20px;
   padding: 4px 14px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
 }
 .header-resort-btn:hover { color: var(--th-primary); border-color: var(--th-primary); }
+.header-resort-btn img { width: 16px; height: 16px; object-fit: contain; }
 
 /* TABS */
 .nav-tabs-wrapper { padding: 0 16px; margin-top: 18px; }
@@ -277,10 +288,20 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
 .sort-scene { animation: scene-fade-in 0.45s ease; }
 @keyframes scene-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Hat animations */
-.hat-emoji { font-size: 5rem; line-height: 1; display: block; margin: 0 auto 14px; filter: drop-shadow(0 0 20px rgba(212,170,80,0.4)); animation: hat-float 3s ease-in-out infinite; }
+/* Hat image — replaces hat-emoji */
+.hat-img {
+  width: 120px; height: 120px;
+  object-fit: contain;
+  display: block; margin: 0 auto 14px;
+  filter: drop-shadow(0 0 20px rgba(212,170,80,0.4));
+  animation: hat-float 3s ease-in-out infinite;
+}
+.hat-img.sm {
+  width: 80px; height: 80px;
+  margin-bottom: 8px;
+}
+.hat-img.thinking { animation: hat-think 0.35s ease-in-out infinite alternate; }
 @keyframes hat-float { 0%,100%{transform:translateY(0) rotate(-2deg);} 50%{transform:translateY(-8px) rotate(2deg);} }
-.hat-emoji.thinking { animation: hat-think 0.35s ease-in-out infinite alternate; }
 @keyframes hat-think { from{transform:rotate(-6deg);} to{transform:rotate(6deg);} }
 
 /* Scene 1 — Welcome */
@@ -310,8 +331,14 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
 .sort-transition-text { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; color: #d4aa50; letter-spacing: 0.1em; line-height: 1.5; animation: glow-pulse 1s ease-in-out infinite alternate; }
 @keyframes glow-pulse { from{text-shadow:0 0 15px rgba(212,170,80,0.4);} to{text-shadow:0 0 40px rgba(212,170,80,0.9),0 0 80px rgba(212,170,80,0.3);} }
 
-/* Scene 5 — Result */
-.sort-result-crest { font-size: 5rem; line-height: 1; display: block; margin: 0 auto 12px; animation: result-pop 0.55s cubic-bezier(0.34,1.56,0.64,1); filter: drop-shadow(0 0 24px var(--result-glow, gold)); }
+/* Scene 5 — Result crest image */
+.sort-result-crest-img {
+  width: 120px; height: 120px;
+  object-fit: contain;
+  display: block; margin: 0 auto 12px;
+  animation: result-pop 0.55s cubic-bezier(0.34,1.56,0.64,1);
+  filter: drop-shadow(0 0 24px var(--result-glow, gold));
+}
 @keyframes result-pop { from{transform:scale(0.2);opacity:0;} to{transform:scale(1);opacity:1;} }
 .sort-result-house { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 5px; color: var(--result-color, gold); text-shadow: 0 0 30px var(--result-glow, gold); }
 .sort-result-motto { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.88rem; color: #8a7a50; margin-bottom: 26px; line-height: 1.5; }
@@ -321,10 +348,12 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
 
 <header>
   <div class="header-inner">
-    <div class="header-crest" id="headerCrest">🧙</div>
+    <img class="header-crest" id="headerCrest" src="images/sorting-hat.png" alt="Crest" />
     <h1 id="headerTitle">Lego Collection Tracker</h1>
     <p id="headerMotto">Loading...</p>
-    <button class="header-resort-btn" onclick="openSortingHat()">🎩 Re-sort Me</button>
+    <button class="header-resort-btn" onclick="openSortingHat()">
+      <img src="images/sorting-hat.png" alt="" /> Re-sort Me
+    </button>
   </div>
 </header>
 
@@ -422,11 +451,11 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
   <!-- Scene 1: Welcome -->
   <div class="sort-box" id="sortScene1">
     <div class="sort-scene">
-      <span class="hat-emoji">🎩</span>
+      <img class="hat-img" src="images/sorting-hat.png" alt="Sorting Hat" />
       <div class="sort-welcome-title">Welcome to Hogwarts</div>
       <div class="sort-welcome-sub">Before you may enter, the Sorting Hat must<br>determine where you truly belong...</div>
       <div class="sort-btn-row">
-        <button class="sort-btn sort-btn-primary" onclick="startSorting()">🎩 Get Sorted</button>
+        <button class="sort-btn sort-btn-primary" onclick="startSorting()">Get Sorted</button>
         <button class="sort-btn sort-btn-secondary" onclick="chooseHogwarts()">Just Visiting</button>
       </div>
     </div>
@@ -435,7 +464,7 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
   <!-- Scene 2: Questions -->
   <div class="sort-box" id="sortScene2" style="display:none">
     <div class="sort-scene">
-      <span class="hat-emoji" style="font-size:3rem;margin-bottom:8px;">🎩</span>
+      <img class="hat-img sm" src="images/sorting-hat.png" alt="Sorting Hat" />
       <div class="sort-q-header" id="qProgress">Question 1 of 3</div>
       <div class="sort-question" id="qText"></div>
       <div class="sort-answers" id="qAnswers"></div>
@@ -445,7 +474,7 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
   <!-- Scene 3: Hat Thinking -->
   <div class="sort-box" id="sortScene3" style="display:none">
     <div class="sort-scene">
-      <span class="hat-emoji thinking">🎩</span>
+      <img class="hat-img thinking" id="thinkingHat" src="images/sorting-hat.png" alt="Sorting Hat" />
       <div class="sort-thinking-msg">
         <span id="thinkingText"></span><span class="cursor"></span>
       </div>
@@ -455,7 +484,7 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
   <!-- Scene 4: "Then let it be..." -->
   <div class="sort-box" id="sortScene4" style="display:none">
     <div class="sort-scene">
-      <span class="hat-emoji">🎩</span>
+      <img class="hat-img" src="images/sorting-hat.png" alt="Sorting Hat" />
       <div class="sort-transition-text">Then let it be...</div>
     </div>
   </div>
@@ -463,7 +492,7 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
   <!-- Scene 5: Result -->
   <div class="sort-box" id="sortScene5" style="display:none">
     <div class="sort-scene">
-      <span class="sort-result-crest" id="resultCrest"></span>
+      <img class="sort-result-crest-img" id="resultCrest" src="" alt="House Crest" />
       <div class="sort-result-house" id="resultHouse"></div>
       <div class="sort-result-motto" id="resultMotto"></div>
       <div class="sort-btn-row">
@@ -478,13 +507,14 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
 <script>
 // ═══════════════════════════════════════════════
 //  HOUSE DEFINITIONS
+//  crest is now an image path instead of an emoji
 // ═══════════════════════════════════════════════
 const HOUSES = {
-  gryffindor: { name:'Gryffindor', crest:'🦁', motto:'Courage · Nerve · Chivalry',               color:'#C41E3A', glow:'rgba(196,30,58,0.7)'   },
-  ravenclaw:  { name:'Ravenclaw',  crest:'🦅', motto:'Wit · Wisdom · Learning',                  color:'#7da7d9', glow:'rgba(125,167,217,0.7)' },
-  hufflepuff: { name:'Hufflepuff', crest:'🦡', motto:'Loyalty · Patience · Hard Work · Fair Play',color:'#F0C040', glow:'rgba(240,192,64,0.7)'  },
-  slytherin:  { name:'Slytherin',  crest:'🐍', motto:'Ambition · Cunning · Resourcefulness',     color:'#2e8b57', glow:'rgba(46,139,87,0.7)'   },
-  hogwarts:   { name:'Hogwarts',   crest:'🏰', motto:'Draco Dormiens Nunquam Titillandus',        color:'#d4aa60', glow:'rgba(212,170,96,0.7)'  },
+  gryffindor: { name:'Gryffindor', crest:'images/crest-gryffindor.png', motto:'Courage · Nerve · Chivalry',                color:'#C41E3A', glow:'rgba(196,30,58,0.7)'   },
+  ravenclaw:  { name:'Ravenclaw',  crest:'images/crest-ravenclaw.png',  motto:'Wit · Wisdom · Learning',                   color:'#7da7d9', glow:'rgba(125,167,217,0.7)' },
+  hufflepuff: { name:'Hufflepuff', crest:'images/crest-hufflepuff.png', motto:'Loyalty · Patience · Hard Work · Fair Play', color:'#F0C040', glow:'rgba(240,192,64,0.7)'  },
+  slytherin:  { name:'Slytherin',  crest:'images/crest-slytherin.png',  motto:'Ambition · Cunning · Resourcefulness',      color:'#2e8b57', glow:'rgba(46,139,87,0.7)'   },
+  hogwarts:   { name:'Hogwarts',   crest:'images/crest-hogwarts.png',   motto:'Draco Dormiens Nunquam Titillandus',         color:'#d4aa60', glow:'rgba(212,170,96,0.7)'  },
 };
 
 const QUESTIONS = [
@@ -530,14 +560,16 @@ const THINKING_GROUPS = [
 
 // ═══════════════════════════════════════════════
 //  THEME APPLICATION
+//  Now sets img src instead of textContent
 // ═══════════════════════════════════════════════
 function applyTheme(house) {
   document.documentElement.setAttribute('data-house', house);
   const h = HOUSES[house];
-  document.getElementById('headerCrest').textContent = h.crest;
+  document.getElementById('headerCrest').src = h.crest;
+  document.getElementById('headerCrest').alt = h.name;
   document.getElementById('headerTitle').textContent = 'Lego Collection Tracker';
   document.getElementById('headerMotto').textContent = h.motto;
-  document.title = h.crest + ' Lego Collection Tracker';
+  document.title = h.name + ' · Lego Collection Tracker';
 }
 
 // ═══════════════════════════════════════════════
@@ -600,7 +632,6 @@ function answerQuestion(house, btn) {
 function runThinkingScene() {
   showScene(3);
   const group = THINKING_GROUPS[Math.floor(Math.random() * THINKING_GROUPS.length)];
-  // Show 1 or 2 phrases depending on group length
   const phrases = group.slice(0, Math.min(group.length, Math.random() < 0.5 ? 1 : 2));
   typePhrasesSequentially(phrases, 0, () => {
     setTimeout(() => {
@@ -639,7 +670,11 @@ function revealResult() {
   scene5.style.setProperty('--result-color', h.color);
   scene5.style.setProperty('--result-glow',  h.glow);
 
-  document.getElementById('resultCrest').textContent = h.crest;
+  // Set the crest image src instead of textContent
+  const crestEl = document.getElementById('resultCrest');
+  crestEl.src = h.crest;
+  crestEl.alt = h.name;
+
   document.getElementById('resultHouse').textContent = h.name + '!';
   document.getElementById('resultMotto').textContent  = h.motto;
   showScene(5);
@@ -665,7 +700,7 @@ function tryAgain() { resetSorting(); showScene(1); }
 })();
 
 // ═══════════════════════════════════════════════
-//  LEGO TRACKER (unchanged logic)
+//  LEGO TRACKER
 // ═══════════════════════════════════════════════
 const API_KEY = 'b129931cfc578eae25cb7f173915261c';
 let hpSetsData = [];
@@ -807,12 +842,11 @@ document.addEventListener('click', e => {
 // LIGHTBOX
 let lbCurrentSet=null, lbCurrentTab=null;
 
-// Generates a consistent fake price from the set number + piece count
-// (same set always shows the same number — looks real, is fake)
+// Generates a consistent placeholder price from set number + piece count
 function stubPrice(setNum, numParts) {
   const seed = setNum.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
   const base = (numParts || 200);
-  const dollars = Math.round((base * 0.07 + (seed % 40)) * 2) / 2; // rough $0.07/piece + variance
+  const dollars = Math.round((base * 0.07 + (seed % 40)) * 2) / 2;
   return '$' + Math.max(9.99, dollars).toFixed(2);
 }
 
@@ -831,7 +865,7 @@ function openLightbox(tab, setNum) {
     <div class="lb-stat"><div class="lb-stat-num">${set.num_parts||'—'}</div><div class="lb-stat-label">Pieces</div></div>
     <div class="lb-stat lb-minifig-stat"><div class="lb-stat-num">…</div><div class="lb-stat-label">Minifigs</div></div>
     <div class="lb-stat lb-theme-stat"><div class="lb-stat-num" style="font-size:0.7rem;padding-top:4px">…</div><div class="lb-stat-label">Theme</div></div>
-    <div class="lb-stat lb-price-stat" title="Lowest current price (BrickOwl) — stubbed data"><div class="lb-stat-num" style="font-size:0.95rem;">${fakePrice}</div><div class="lb-stat-label">From (US) 🛒</div></div>`;
+    <div class="lb-stat lb-price-stat" title="Placeholder price — not real market data"><div class="lb-stat-num" style="font-size:0.95rem;">${fakePrice}</div><div class="lb-stat-label">From (US) 🛒</div></div>`;
   document.getElementById('lbDetailArea').innerHTML='<div class="lb-loading-detail">Summoning details...</div>';
   document.getElementById('lbLink').href=`https://rebrickable.com/sets/${set.set_num}/`;
   lbUpdateStatusButtons(set.status);
