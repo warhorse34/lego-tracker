@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧙 Lego Collection Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&family=Lato:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+
+/* ═══════════════════════════════════════════════
+   HOUSE THEME DEFINITIONS
+   All theme colours route through --th-* vars.
+   applyTheme() swaps data-house on <html>.
+═══════════════════════════════════════════════ */
+:root {
+  --th-primary:      #F0C040;
+  --th-primary-dk:   #c9a227;
+  --th-primary-glow: rgba(240,192,64,0.25);
+  --th-black:        #1a1508;
+  --th-dark:         #231e0e;
+  --th-dark2:        #2e2710;
+  --th-dark3:        #3a3218;
+  --th-mid:          #4a4220;
+  --th-text:         #e8dfc0;
+  --th-text-muted:   #9a8f6a;
+  --th-border:       rgba(240,192,64,0.3);
+  --th-header-top:   #0a0800;
+  --th-header-mid:   #1c1600;
+  --th-header-bot:   #2a1f00;
+  --th-radial:       #2e2500;
+  --owned-color:     #4caf50;
+  --wishlist-color:  #c084fc;
+  --none-color:      #6b7280;
+}
+html[data-house="gryffindor"] {
+  --th-primary:      #C41E3A;
+  --th-primary-dk:   #9e1530;
+  --th-primary-glow: rgba(196,30,58,0.25);
+  --th-black:        #130408;
+  --th-dark:         #1e060c;
+  --th-dark2:        #2a0c13;
+  --th-dark3:        #35111a;
+  --th-mid:          #4a1a26;
+  --th-text:         #f0d8bb;
+  --th-text-muted:   #9a7060;
+  --th-border:       rgba(196,30,58,0.35);
+  --th-header-top:   #0a0204;
+  --th-header-mid:   #180508;
+  --th-header-bot:   #220a10;
+  --th-radial:       #2a0810;
+}
+html[data-house="ravenclaw"] {
+  --th-primary:      #7da7d9;
+  --th-primary-dk:   #5588bb;
+  --th-primary-glow: rgba(125,167,217,0.25);
+  --th-black:        #070c14;
+  --th-dark:         #0d1520;
+  --th-dark2:        #131d2b;
+  --th-dark3:        #1a2638;
+  --th-mid:          #243450;
+  --th-text:         #d4e4f8;
+  --th-text-muted:   #6880a0;
+  --th-border:       rgba(125,167,217,0.3);
+  --th-header-top:   #040810;
+  --th-header-mid:   #0a1220;
+  --th-header-bot:   #101a2c;
+  --th-radial:       #0c1828;
+}
+html[data-house="slytherin"] {
+  --th-primary:      #2e8b57;
+  --th-primary-dk:   #1f6b40;
+  --th-primary-glow: rgba(46,139,87,0.25);
+  --th-black:        #050f08;
+  --th-dark:         #0a160d;
+  --th-dark2:        #0f1e12;
+  --th-dark3:        #162818;
+  --th-mid:          #1e3820;
+  --th-text:         #c8e8d0;
+  --th-text-muted:   #6a9070;
+  --th-border:       rgba(46,139,87,0.3);
+  --th-header-top:   #030a05;
+  --th-header-mid:   #08120a;
+  --th-header-bot:   #0d1a10;
+  --th-radial:       #0a1a0c;
+}
+html[data-house="hogwarts"] {
+  --th-primary:      #d4aa60;
+  --th-primary-dk:   #a88240;
+  --th-primary-glow: rgba(212,170,96,0.22);
+  --th-black:        #100e0a;
+  --th-dark:         #1a1714;
+  --th-dark2:        #221f1a;
+  --th-dark3:        #2c2820;
+  --th-mid:          #3c3628;
+  --th-text:         #e8e0cc;
+  --th-text-muted:   #888070;
+  --th-border:       rgba(212,170,96,0.28);
+  --th-header-top:   #080704;
+  --th-header-mid:   #14120c;
+  --th-header-bot:   #1c1a12;
+  --th-radial:       #1e1a10;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Lato', sans-serif;
+  background-color: var(--th-black);
+  background-image:
+    radial-gradient(ellipse at top, var(--th-radial) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 2px,
+      rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+  color: var(--th-text);
+  min-height: 100vh;
+  transition: background-color 0.7s, color 0.4s;
+}
+
+/* HEADER */
+header {
+  background: linear-gradient(180deg, var(--th-header-top) 0%, var(--th-header-mid) 60%, var(--th-header-bot) 100%);
+  border-bottom: 2px solid var(--th-primary);
+  box-shadow: 0 4px 30px var(--th-primary-glow);
+  padding: 22px 20px 16px;
+  text-align: center;
+  position: relative; overflow: hidden;
+  transition: background 0.7s, border-color 0.7s, box-shadow 0.7s;
+}
+header::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, var(--th-primary-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+.header-inner { position: relative; }
+.header-crest { font-size: 2.4rem; line-height: 1; margin-bottom: 5px; filter: drop-shadow(0 0 12px var(--th-primary-glow)); transition: filter 0.7s; }
+header h1 { font-family: 'Cinzel', serif; font-size: 1.6rem; font-weight: 700; color: var(--th-primary); letter-spacing: 0.08em; text-shadow: 0 0 20px var(--th-primary-glow), 0 2px 4px rgba(0,0,0,0.8); margin-bottom: 3px; transition: color 0.7s; }
+header p { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.85rem; color: var(--th-text-muted); letter-spacing: 0.05em; transition: color 0.7s; }
+.header-resort-btn {
+  margin-top: 10px; display: inline-block;
+  font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.06em;
+  color: var(--th-text-muted); background: none;
+  border: 1px solid var(--th-border); border-radius: 20px;
+  padding: 4px 14px; cursor: pointer; transition: color 0.2s, border-color 0.2s;
+}
+.header-resort-btn:hover { color: var(--th-primary); border-color: var(--th-primary); }
+
+/* TABS */
+.nav-tabs-wrapper { padding: 0 16px; margin-top: 18px; }
+.nav-tabs { border-bottom: 2px solid var(--th-border); gap: 6px; transition: border-color 0.7s; }
+.nav-tabs .nav-link {
+  font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.06em;
+  color: var(--th-text-muted); background: var(--th-dark); border: 1px solid var(--th-border);
+  border-bottom: none; border-radius: 8px 8px 0 0; padding: 10px 18px; transition: all 0.2s; text-decoration: none;
+}
+.nav-tabs .nav-link:hover { color: var(--th-primary); background: var(--th-dark2); }
+.nav-tabs .nav-link.active { color: var(--th-primary); background: var(--th-dark2); border-color: var(--th-primary-dk); border-bottom-color: var(--th-dark2); box-shadow: 0 -2px 10px var(--th-primary-glow); }
+
+/* TAB PANELS */
+.tab-panel { display: none; background: var(--th-dark2); border: 1px solid var(--th-border); border-top: none; border-radius: 0 0 12px 12px; padding: 20px; margin: 0 16px 24px; transition: background 0.7s, border-color 0.7s; }
+.tab-panel.active { display: block; }
+
+/* STATS */
+.stats-bar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.stat { background: var(--th-dark3); border: 1px solid var(--th-border); border-radius: 10px; padding: 10px 14px; text-align: center; flex: 1; min-width: 72px; transition: background 0.7s, border-color 0.7s; }
+.stat .num { font-family: 'Cinzel', serif; font-size: 1.4rem; font-weight: 700; color: var(--th-primary); line-height: 1; transition: color 0.7s; }
+.stat .label { font-size: 0.7rem; color: var(--th-text-muted); margin-top: 4px; }
+
+/* CONTROLS */
+.controls-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+.filter-bar { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.filter-btn { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--th-border); background: var(--th-dark3); color: var(--th-text-muted); cursor: pointer; font-size: 0.78rem; font-family: 'Lato', sans-serif; transition: all 0.2s; }
+.filter-btn:hover { background: var(--th-mid); color: var(--th-primary); }
+.filter-btn.active { background: var(--th-primary); color: var(--th-black); border-color: var(--th-primary); font-weight: 700; }
+.sort-label { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--th-text-muted); white-space: nowrap; letter-spacing: 0.05em; }
+.sort-select { padding: 5px 28px 5px 10px; border-radius: 20px; border: 1px solid var(--th-border); background: var(--th-dark3); color: var(--th-text); font-size: 0.78rem; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23aaaaaa'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+
+/* SET CARDS */
+.sets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 14px; }
+.set-card { background: var(--th-dark3); border-radius: 10px; overflow: hidden; border: 2px solid var(--th-border); transition: transform 0.15s, box-shadow 0.15s, border-color 0.2s; position: relative; cursor: pointer; }
+.set-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+.set-card.owned     { border-color: var(--owned-color);    box-shadow: 0 0 10px rgba(76,175,80,0.2); }
+.set-card.wishlist  { border-color: var(--wishlist-color); box-shadow: 0 0 10px rgba(192,132,252,0.2); }
+.set-card.in-progress { border-color: var(--th-primary); box-shadow: 0 0 10px var(--th-primary-glow); }
+.set-card .img-wrapper { background: #fff; height: 115px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.set-card img { width: 100%; height: 115px; object-fit: contain; padding: 4px; }
+.set-card .set-info { padding: 10px; }
+.set-card .set-name { font-size: 0.78rem; font-weight: 600; line-height: 1.35; margin-bottom: 3px; color: var(--th-text); }
+.set-card .set-num  { font-size: 0.68rem; color: var(--th-text-muted); margin-bottom: 8px; }
+.set-card select { width: 100%; padding: 5px 6px; border-radius: 6px; border: 1px solid var(--th-border); background: var(--th-dark); color: var(--th-text); font-size: 0.72rem; cursor: pointer; }
+.status-badge { position: absolute; top: 7px; right: 7px; width: 11px; height: 11px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.3); }
+.status-badge.owned       { background: var(--owned-color); }
+.status-badge.wishlist    { background: var(--wishlist-color); }
+.status-badge.in-progress { background: var(--th-primary); }
+.status-badge.none        { background: var(--none-color); }
+
+/* SEARCH */
+.search-box { position: relative; margin-bottom: 18px; }
+.search-box input { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--th-border); background: var(--th-dark3); color: var(--th-text); font-size: 0.95rem; font-family: 'Lato', sans-serif; transition: border-color 0.2s, box-shadow 0.2s; }
+.search-box input:focus { outline: none; border-color: var(--th-primary); box-shadow: 0 0 0 3px var(--th-primary-glow); }
+.search-box input::placeholder { color: var(--th-text-muted); }
+.autocomplete-list { position: absolute; top: 100%; left: 0; right: 0; background: var(--th-dark2); border: 1px solid var(--th-primary-dk); border-radius: 0 0 10px 10px; z-index: 100; max-height: 260px; overflow-y: auto; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+.autocomplete-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; border-bottom: 1px solid var(--th-border); transition: background 0.15s; }
+.autocomplete-item:hover { background: var(--th-dark3); }
+.autocomplete-item:last-child { border-bottom: none; }
+.autocomplete-item img { width: 42px; height: 42px; object-fit: contain; background: #fff; border-radius: 5px; flex-shrink: 0; }
+.autocomplete-item .item-name { font-size: 0.85rem; color: var(--th-text); }
+.autocomplete-item .item-num  { font-size: 0.72rem; color: var(--th-text-muted); margin-top: 2px; }
+
+/* LOADING / EMPTY */
+.loading { text-align: center; padding: 40px 20px; color: var(--th-text-muted); font-size: 0.9rem; }
+.loading .spinner { width: 34px; height: 34px; border: 3px solid var(--th-dark3); border-top-color: var(--th-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+.loading p { font-family: 'IM Fell English', serif; font-style: italic; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty-state { text-align: center; padding: 40px 20px; color: var(--th-text-muted); font-family: 'IM Fell English', serif; font-style: italic; font-size: 1rem; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--th-dark); }
+::-webkit-scrollbar-thumb { background: var(--th-mid); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--th-primary-dk); }
+
+/* LIGHTBOX */
+.lb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 1000; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+.lb-overlay.open { display: flex; }
+.lb-box { background: var(--th-dark2); border: 2px solid var(--th-primary-dk); border-radius: 16px; max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 0 60px var(--th-primary-glow), 0 20px 60px rgba(0,0,0,0.6); position: relative; animation: lb-in 0.2s ease; }
+@keyframes lb-in { from { opacity: 0; transform: scale(0.94) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.lb-close { position: absolute; top: 14px; right: 16px; background: none; border: none; color: var(--th-text-muted); font-size: 1.4rem; cursor: pointer; line-height: 1; transition: color 0.15s; z-index: 10; }
+.lb-close:hover { color: var(--th-primary); }
+.lb-img-wrapper { background: #fff; border-radius: 14px 14px 0 0; overflow: hidden; height: 220px; display: flex; align-items: center; justify-content: center; }
+.lb-img-wrapper img { max-height: 210px; max-width: 100%; object-fit: contain; padding: 8px; }
+.lb-body { padding: 20px 22px 24px; }
+.lb-title { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: var(--th-primary); line-height: 1.3; margin-bottom: 4px; padding-right: 24px; }
+.lb-set-num { font-size: 0.78rem; color: var(--th-text-muted); margin-bottom: 16px; }
+.lb-stats { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+.lb-stat { background: var(--th-dark3); border: 1px solid var(--th-border); border-radius: 8px; padding: 8px 12px; text-align: center; flex: 1; min-width: 60px; }
+.lb-stat .lb-stat-num { font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: 700; color: var(--th-primary); line-height: 1; }
+.lb-stat .lb-stat-label { font-size: 0.65rem; color: var(--th-text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+.lb-divider { border: none; border-top: 1px solid var(--th-border); margin: 16px 0; }
+.lb-section-label { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--th-text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+.lb-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+.lb-status-btn { padding: 10px 8px; border-radius: 8px; border: 2px solid var(--th-border); background: var(--th-dark3); color: var(--th-text-muted); cursor: pointer; font-size: 0.82rem; font-family: 'Lato', sans-serif; text-align: center; transition: all 0.2s; line-height: 1.3; }
+.lb-status-btn:hover { border-color: var(--th-primary-dk); color: var(--th-text); }
+.lb-status-btn.active-none     { border-color: var(--none-color);    background: rgba(107,114,128,0.15); color: #9ca3af; }
+.lb-status-btn.active-owned    { border-color: var(--owned-color);   background: rgba(76,175,80,0.12);   color: #81c784; }
+.lb-status-btn.active-progress { border-color: var(--th-primary);   background: var(--th-primary-glow); color: var(--th-primary); }
+.lb-status-btn.active-wishlist { border-color: var(--wishlist-color);background: rgba(192,132,252,0.12);color: #d8b4fe; }
+.lb-link { display: inline-block; font-size: 0.8rem; color: var(--th-primary-dk); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s, color 0.15s; }
+.lb-link:hover { color: var(--th-primary); border-bottom-color: var(--th-primary); }
+.lb-loading-detail { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.85rem; color: var(--th-text-muted); text-align: center; padding: 8px 0; }
+
+/* ═══════════════════════════════════════════════
+   SORTING HAT OVERLAY
+═══════════════════════════════════════════════ */
+#sortingOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.96); z-index: 2000;
+  align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(6px);
+}
+#sortingOverlay.open { display: flex; }
+
+.sort-box {
+  background: #110e07; border: 2px solid #6b5c2a; border-radius: 20px;
+  max-width: 480px; width: 100%; padding: 36px 28px 32px;
+  text-align: center;
+  box-shadow: 0 0 80px rgba(212,170,80,0.15), 0 24px 80px rgba(0,0,0,0.7);
+  position: relative; overflow: hidden;
+  animation: lb-in 0.3s ease;
+}
+.sort-box::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #d4aa50, transparent);
+}
+
+.sort-scene { animation: scene-fade-in 0.45s ease; }
+@keyframes scene-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Hat animations */
+.hat-emoji { font-size: 5rem; line-height: 1; display: block; margin: 0 auto 14px; filter: drop-shadow(0 0 20px rgba(212,170,80,0.4)); animation: hat-float 3s ease-in-out infinite; }
+@keyframes hat-float { 0%,100%{transform:translateY(0) rotate(-2deg);} 50%{transform:translateY(-8px) rotate(2deg);} }
+.hat-emoji.thinking { animation: hat-think 0.35s ease-in-out infinite alternate; }
+@keyframes hat-think { from{transform:rotate(-6deg);} to{transform:rotate(6deg);} }
+
+/* Scene 1 — Welcome */
+.sort-welcome-title { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; color: #d4aa50; letter-spacing: 0.06em; text-shadow: 0 0 20px rgba(212,170,80,0.5); margin-bottom: 8px; }
+.sort-welcome-sub { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.95rem; color: #8a7a50; margin-bottom: 28px; line-height: 1.6; }
+.sort-btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.sort-btn { font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; padding: 12px 24px; border-radius: 30px; cursor: pointer; transition: all 0.2s; border: 2px solid; }
+.sort-btn-primary { background: #d4aa50; color: #0a0800; border-color: #d4aa50; }
+.sort-btn-primary:hover { background: #e8c060; border-color: #e8c060; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(212,170,80,0.3); }
+.sort-btn-secondary { background: transparent; color: #6b5c2a; border-color: #3a3010; }
+.sort-btn-secondary:hover { color: #d4aa50; border-color: #6b5c2a; }
+
+/* Scene 2 — Questions */
+.sort-q-header { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 0.12em; color: #6b5c2a; text-transform: uppercase; margin-bottom: 18px; }
+.sort-question { font-family: 'IM Fell English', serif; font-size: 1.08rem; color: #e8dfc0; line-height: 1.55; margin-bottom: 16px; font-style: italic; }
+.sort-answers { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.sort-answer { padding: 11px 16px; border-radius: 10px; border: 1px solid #2a2010; background: #1a1508; color: #c8b880; font-size: 0.87rem; font-family: 'Lato', sans-serif; cursor: pointer; transition: all 0.18s; line-height: 1.4; }
+.sort-answer:hover { border-color: #d4aa50; background: #231e0e; color: #e8dfc0; transform: translateX(4px); }
+.sort-answer.selected { border-color: #d4aa50; background: rgba(212,170,80,0.1); color: #d4aa50; pointer-events: none; }
+
+/* Scene 3 — Hat Thinking */
+.sort-thinking-msg { font-family: 'IM Fell English', serif; font-style: italic; font-size: 1.12rem; color: #d4aa50; min-height: 90px; display: flex; align-items: center; justify-content: center; text-shadow: 0 0 15px rgba(212,170,80,0.4); line-height: 1.6; padding: 0 6px; }
+.sort-thinking-msg .cursor { display: inline-block; width: 2px; height: 1.1em; background: #d4aa50; margin-left: 2px; animation: blink 0.65s step-end infinite; vertical-align: text-bottom; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Scene 4 — Then let it be */
+.sort-transition-text { font-family: 'Cinzel', serif; font-size: 1.5rem; font-weight: 700; color: #d4aa50; letter-spacing: 0.1em; line-height: 1.5; animation: glow-pulse 1s ease-in-out infinite alternate; }
+@keyframes glow-pulse { from{text-shadow:0 0 15px rgba(212,170,80,0.4);} to{text-shadow:0 0 40px rgba(212,170,80,0.9),0 0 80px rgba(212,170,80,0.3);} }
+
+/* Scene 5 — Result */
+.sort-result-crest { font-size: 5rem; line-height: 1; display: block; margin: 0 auto 12px; animation: result-pop 0.55s cubic-bezier(0.34,1.56,0.64,1); filter: drop-shadow(0 0 24px var(--result-glow, gold)); }
+@keyframes result-pop { from{transform:scale(0.2);opacity:0;} to{transform:scale(1);opacity:1;} }
+.sort-result-house { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 5px; color: var(--result-color, gold); text-shadow: 0 0 30px var(--result-glow, gold); }
+.sort-result-motto { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.88rem; color: #8a7a50; margin-bottom: 26px; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="header-crest" id="headerCrest">🧙</div>
+    <h1 id="headerTitle">Lego Collection Tracker</h1>
+    <p id="headerMotto">Loading...</p>
+    <button class="header-resort-btn" onclick="openSortingHat()">🎩 Re-sort Me</button>
+  </div>
+</header>
+
+<div class="nav-tabs-wrapper">
+  <ul class="nav nav-tabs">
+    <li class="nav-item"><a class="nav-link active" onclick="switchTab('hp', this); return false;" href="#">⚡ Harry Potter</a></li>
+    <li class="nav-item"><a class="nav-link" onclick="switchTab('other', this); return false;" href="#">🧱 Other Sets</a></li>
+  </ul>
+</div>
+
+<div class="tab-panel active" id="tab-hp">
+  <div class="stats-bar" id="hpStats"></div>
+  <div class="controls-row">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterSets('all','hp',event)">All</button>
+      <button class="filter-btn" onclick="filterSets('owned','hp',event)">✅ Complete</button>
+      <button class="filter-btn" onclick="filterSets('in-progress','hp',event)">🔨 Not Complete</button>
+      <button class="filter-btn" onclick="filterSets('wishlist','hp',event)">⭐ Wishlist</button>
+      <button class="filter-btn" onclick="filterSets('none','hp',event)">📦 Not Owned</button>
+    </div>
+    <span class="sort-label">Sort:</span>
+    <select class="sort-select" onchange="changeSort('hp', this.value)">
+      <option value="year_asc">Year ↑</option>
+      <option value="year_desc" selected>Year ↓</option>
+      <option value="name_asc">Name A–Z</option>
+      <option value="name_desc">Name Z–A</option>
+      <option value="num_parts_desc">Most Pieces</option>
+      <option value="num_parts_asc">Fewest Pieces</option>
+      <option value="set_num_asc">Set # ↑</option>
+      <option value="set_num_desc">Set # ↓</option>
+    </select>
+  </div>
+  <div id="hpSets" class="sets-grid">
+    <div class="loading"><div class="spinner"></div><p>Summoning Harry Potter sets...</p></div>
+  </div>
+</div>
+
+<div class="tab-panel" id="tab-other">
+  <div class="search-box">
+    <input type="text" id="setSearch" placeholder="🔍 Search for any Lego set..." oninput="searchSets(this.value)" autocomplete="off" />
+    <div class="autocomplete-list" id="autocompleteList" style="display:none"></div>
+  </div>
+  <div class="stats-bar" id="otherStats"></div>
+  <div class="controls-row">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterSets('all','other',event)">All</button>
+      <button class="filter-btn" onclick="filterSets('owned','other',event)">✅ Complete</button>
+      <button class="filter-btn" onclick="filterSets('in-progress','other',event)">🔨 Not Complete</button>
+      <button class="filter-btn" onclick="filterSets('wishlist','other',event)">⭐ Wishlist</button>
+      <button class="filter-btn" onclick="filterSets('none','other',event)">📦 Not Owned</button>
+    </div>
+    <span class="sort-label">Sort:</span>
+    <select class="sort-select" onchange="changeSort('other', this.value)">
+      <option value="year_asc">Year ↑</option>
+      <option value="year_desc" selected>Year ↓</option>
+      <option value="name_asc">Name A–Z</option>
+      <option value="name_desc">Name Z–A</option>
+      <option value="num_parts_desc">Most Pieces</option>
+      <option value="num_parts_asc">Fewest Pieces</option>
+      <option value="set_num_asc">Set # ↑</option>
+      <option value="set_num_desc">Set # ↓</option>
+    </select>
+  </div>
+  <div id="otherSets" class="sets-grid">
+    <div class="empty-state">Search for a set above to add it to your collection</div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb-overlay" id="lbOverlay" onclick="closeLightboxOnOverlay(event)">
+  <div class="lb-box" id="lbBox">
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
+    <div class="lb-img-wrapper"><img id="lbImg" src="" alt="" /></div>
+    <div class="lb-body">
+      <div class="lb-title" id="lbTitle"></div>
+      <div class="lb-set-num" id="lbSetNum"></div>
+      <div class="lb-stats" id="lbStats"></div>
+      <div id="lbDetailArea" class="lb-loading-detail">Loading details...</div>
+      <hr class="lb-divider">
+      <div class="lb-section-label">Status</div>
+      <div class="lb-status-grid">
+        <button class="lb-status-btn" id="lbBtnNone"     onclick="lbSetStatus('none')">📦<br>Not Owned</button>
+        <button class="lb-status-btn" id="lbBtnOwned"    onclick="lbSetStatus('owned')">✅<br>Owned – Complete</button>
+        <button class="lb-status-btn" id="lbBtnProgress" onclick="lbSetStatus('in-progress')">🔨<br>Owned – Not Complete</button>
+        <button class="lb-status-btn" id="lbBtnWishlist" onclick="lbSetStatus('wishlist')">⭐<br>Wishlist</button>
+      </div>
+      <a id="lbLink" class="lb-link" href="#" target="_blank">View on Rebrickable ↗</a>
+    </div>
+  </div>
+</div>
+
+<!-- SORTING HAT OVERLAY -->
+<div id="sortingOverlay">
+
+  <!-- Scene 1: Welcome -->
+  <div class="sort-box" id="sortScene1">
+    <div class="sort-scene">
+      <span class="hat-emoji">🎩</span>
+      <div class="sort-welcome-title">Welcome to Hogwarts</div>
+      <div class="sort-welcome-sub">Before you may enter, the Sorting Hat must<br>determine where you truly belong...</div>
+      <div class="sort-btn-row">
+        <button class="sort-btn sort-btn-primary" onclick="startSorting()">🎩 Get Sorted</button>
+        <button class="sort-btn sort-btn-secondary" onclick="chooseHogwarts()">Just Visiting</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 2: Questions -->
+  <div class="sort-box" id="sortScene2" style="display:none">
+    <div class="sort-scene">
+      <span class="hat-emoji" style="font-size:3rem;margin-bottom:8px;">🎩</span>
+      <div class="sort-q-header" id="qProgress">Question 1 of 3</div>
+      <div class="sort-question" id="qText"></div>
+      <div class="sort-answers" id="qAnswers"></div>
+    </div>
+  </div>
+
+  <!-- Scene 3: Hat Thinking -->
+  <div class="sort-box" id="sortScene3" style="display:none">
+    <div class="sort-scene">
+      <span class="hat-emoji thinking">🎩</span>
+      <div class="sort-thinking-msg">
+        <span id="thinkingText"></span><span class="cursor"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: "Then let it be..." -->
+  <div class="sort-box" id="sortScene4" style="display:none">
+    <div class="sort-scene">
+      <span class="hat-emoji">🎩</span>
+      <div class="sort-transition-text">Then let it be...</div>
+    </div>
+  </div>
+
+  <!-- Scene 5: Result -->
+  <div class="sort-box" id="sortScene5" style="display:none">
+    <div class="sort-scene">
+      <span class="sort-result-crest" id="resultCrest"></span>
+      <div class="sort-result-house" id="resultHouse"></div>
+      <div class="sort-result-motto" id="resultMotto"></div>
+      <div class="sort-btn-row">
+        <button class="sort-btn sort-btn-primary" onclick="acceptHouse()">Stay in House</button>
+        <button class="sort-btn sort-btn-secondary" onclick="tryAgain()">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  HOUSE DEFINITIONS
+// ═══════════════════════════════════════════════
+const HOUSES = {
+  gryffindor: { name:'Gryffindor', crest:'🦁', motto:'Courage · Nerve · Chivalry',               color:'#C41E3A', glow:'rgba(196,30,58,0.7)'   },
+  ravenclaw:  { name:'Ravenclaw',  crest:'🦅', motto:'Wit · Wisdom · Learning',                  color:'#7da7d9', glow:'rgba(125,167,217,0.7)' },
+  hufflepuff: { name:'Hufflepuff', crest:'🦡', motto:'Loyalty · Patience · Hard Work · Fair Play',color:'#F0C040', glow:'rgba(240,192,64,0.7)'  },
+  slytherin:  { name:'Slytherin',  crest:'🐍', motto:'Ambition · Cunning · Resourcefulness',     color:'#2e8b57', glow:'rgba(46,139,87,0.7)'   },
+  hogwarts:   { name:'Hogwarts',   crest:'🏰', motto:'Draco Dormiens Nunquam Titillandus',        color:'#d4aa60', glow:'rgba(212,170,96,0.7)'  },
+};
+
+const QUESTIONS = [
+  {
+    text: '"When faced with a difficult problem, you tend to..."',
+    answers: [
+      { text:'Rush in and trust your instincts',      house:'gryffindor' },
+      { text:'Find the cleverest possible solution',  house:'ravenclaw'  },
+      { text:'Work steadily until it is solved',      house:'hufflepuff' },
+      { text:'Do whatever it takes to win',           house:'slytherin'  },
+    ]
+  },
+  {
+    text: '"Above all else, you value..."',
+    answers: [
+      { text:'Courage and daring',           house:'gryffindor' },
+      { text:'Wisdom and wit',               house:'ravenclaw'  },
+      { text:'Loyalty and fairness',         house:'hufflepuff' },
+      { text:'Ambition and resourcefulness', house:'slytherin'  },
+    ]
+  },
+  {
+    text: '"Your closest friends would describe you as..."',
+    answers: [
+      { text:'Bold and brave, never backing down',     house:'gryffindor' },
+      { text:'Curious and endlessly thoughtful',       house:'ravenclaw'  },
+      { text:'Dependable, warm, and kind',             house:'hufflepuff' },
+      { text:'Determined and quietly strategic',       house:'slytherin'  },
+    ]
+  }
+];
+
+// Groups of hat phrases — one group is picked randomly per sorting
+const THINKING_GROUPS = [
+  ['"Hmm... yes, yes... quite unusual this one."', '"The mind runs deeper than it appears..."'],
+  ['"Difficult, very difficult... I see much here."', '"Plenty of courage, I notice... but what else?"'],
+  ['"Ah... a curious mixture. Most curious indeed."', '"I rarely take this long with anyone..."'],
+  ['"Yes, yes... the truth is beginning to reveal itself."'],
+  ['"Not quite like the others, are we? Interesting."', '"There is something here the years will prove out..."'],
+  ['"The heart is speaking louder than the head tonight..."'],
+  ['"So much hidden beneath the surface... remarkable."'],
+];
+
+// ═══════════════════════════════════════════════
+//  THEME APPLICATION
+// ═══════════════════════════════════════════════
+function applyTheme(house) {
+  document.documentElement.setAttribute('data-house', house);
+  const h = HOUSES[house];
+  document.getElementById('headerCrest').textContent = h.crest;
+  document.getElementById('headerTitle').textContent = 'Lego Collection Tracker';
+  document.getElementById('headerMotto').textContent = h.motto;
+  document.title = h.crest + ' Lego Collection Tracker';
+}
+
+// ═══════════════════════════════════════════════
+//  SORTING HAT FLOW
+// ═══════════════════════════════════════════════
+let sortScores   = { gryffindor:0, ravenclaw:0, hufflepuff:0, slytherin:0 };
+let currentQ     = 0;
+let sortedHouse  = null;
+
+function openSortingHat() {
+  resetSorting();
+  showScene(1);
+  document.getElementById('sortingOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSortingHat() {
+  document.getElementById('sortingOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function showScene(n) {
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('sortScene' + i);
+    if (el) el.style.display = (i === n) ? 'block' : 'none';
+  }
+}
+function resetSorting() {
+  sortScores = { gryffindor:0, ravenclaw:0, hufflepuff:0, slytherin:0 };
+  currentQ = 0; sortedHouse = null;
+}
+
+function startSorting() { showScene(2); renderQuestion(0); }
+
+function chooseHogwarts() {
+  localStorage.setItem('sorted_house','hogwarts');
+  applyTheme('hogwarts');
+  closeSortingHat();
+}
+
+function renderQuestion(idx) {
+  const q = QUESTIONS[idx];
+  document.getElementById('qProgress').textContent = `Question ${idx + 1} of ${QUESTIONS.length}`;
+  document.getElementById('qText').textContent = q.text;
+  const shuffled = [...q.answers].sort(() => Math.random() - 0.5);
+  document.getElementById('qAnswers').innerHTML = shuffled
+    .map(a => `<button class="sort-answer" onclick="answerQuestion('${a.house}',this)">${a.text}</button>`)
+    .join('');
+}
+
+function answerQuestion(house, btn) {
+  document.querySelectorAll('.sort-answer').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  sortScores[house]++;
+  currentQ++;
+  setTimeout(() => {
+    if (currentQ < QUESTIONS.length) { renderQuestion(currentQ); }
+    else { runThinkingScene(); }
+  }, 380);
+}
+
+function runThinkingScene() {
+  showScene(3);
+  const group = THINKING_GROUPS[Math.floor(Math.random() * THINKING_GROUPS.length)];
+  // Show 1 or 2 phrases depending on group length
+  const phrases = group.slice(0, Math.min(group.length, Math.random() < 0.5 ? 1 : 2));
+  typePhrasesSequentially(phrases, 0, () => {
+    setTimeout(() => {
+      showScene(4);
+      setTimeout(revealResult, 2500);
+    }, 900);
+  });
+}
+
+function typePhrasesSequentially(phrases, idx, done) {
+  if (idx >= phrases.length) { done(); return; }
+  const el = document.getElementById('thinkingText');
+  typeText(el, phrases[idx], 40, () => {
+    setTimeout(() => {
+      el.textContent = '';
+      setTimeout(() => typePhrasesSequentially(phrases, idx + 1, done), 300);
+    }, 1400);
+  });
+}
+
+function typeText(el, text, speed, cb) {
+  el.textContent = ''; let i = 0;
+  const iv = setInterval(() => {
+    el.textContent += text[i++];
+    if (i >= text.length) { clearInterval(iv); if (cb) cb(); }
+  }, speed);
+}
+
+function revealResult() {
+  const max = Math.max(...Object.values(sortScores));
+  const winners = Object.keys(sortScores).filter(h => sortScores[h] === max);
+  sortedHouse = winners[Math.floor(Math.random() * winners.length)];
+  const h = HOUSES[sortedHouse];
+
+  const scene5 = document.getElementById('sortScene5');
+  scene5.style.setProperty('--result-color', h.color);
+  scene5.style.setProperty('--result-glow',  h.glow);
+
+  document.getElementById('resultCrest').textContent = h.crest;
+  document.getElementById('resultHouse').textContent = h.name + '!';
+  document.getElementById('resultMotto').textContent  = h.motto;
+  showScene(5);
+}
+
+function acceptHouse() {
+  if (!sortedHouse) return;
+  localStorage.setItem('sorted_house', sortedHouse);
+  applyTheme(sortedHouse);
+  closeSortingHat();
+}
+function tryAgain() { resetSorting(); showScene(1); }
+
+// ── Kick off on load ──
+(function init() {
+  const saved = localStorage.getItem('sorted_house');
+  if (saved && HOUSES[saved]) {
+    applyTheme(saved);
+  } else {
+    applyTheme('hogwarts');
+    setTimeout(openSortingHat, 600);
+  }
+})();
+
+// ═══════════════════════════════════════════════
+//  LEGO TRACKER (unchanged logic)
+// ═══════════════════════════════════════════════
+const API_KEY = 'b129931cfc578eae25cb7f173915261c';
+let hpSetsData = [];
+let otherSetsData = JSON.parse(localStorage.getItem('other_sets') || '[]');
+let currentHpFilter = 'all', currentOtherFilter = 'all';
+let currentHpSort = 'year_desc', currentOtherSort = 'year_desc';
+let searchTimeout = null;
+
+loadHarryPotterSets();
+
+async function loadHarryPotterSets() {
+  const container = document.getElementById('hpSets');
+  container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Summoning Harry Potter sets...</p></div>';
+  try {
+    let allSets = [];
+    let nextUrl = `https://rebrickable.com/api/v3/lego/sets/?theme_id=246&page_size=100&key=${API_KEY}`;
+    while (nextUrl) {
+      const res = await fetch(nextUrl);
+      if (!res.ok) throw new Error('API error ' + res.status);
+      const data = await res.json();
+      allSets = allSets.concat(data.results);
+      nextUrl = data.next || null;
+    }
+    const saved = JSON.parse(localStorage.getItem('hp_statuses') || '{}');
+    hpSetsData = allSets.map(s => ({ set_num:s.set_num, name:s.name, year:s.year, num_parts:s.num_parts||0, img:s.set_img_url, status:saved[s.set_num]||'none' }));
+    renderSets('hp');
+  } catch(e) {
+    container.innerHTML = `<div class="loading">❌ Error loading sets.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function sortData(data, key) {
+  const s = [...data];
+  switch(key) {
+    case 'year_asc':       return s.sort((a,b)=>(a.year||0)-(b.year||0));
+    case 'year_desc':      return s.sort((a,b)=>(b.year||0)-(a.year||0));
+    case 'name_asc':       return s.sort((a,b)=>a.name.localeCompare(b.name));
+    case 'name_desc':      return s.sort((a,b)=>b.name.localeCompare(a.name));
+    case 'num_parts_asc':  return s.sort((a,b)=>(a.num_parts||0)-(b.num_parts||0));
+    case 'num_parts_desc': return s.sort((a,b)=>(b.num_parts||0)-(a.num_parts||0));
+    case 'set_num_asc':    return s.sort((a,b)=>a.set_num.localeCompare(b.set_num));
+    case 'set_num_desc':   return s.sort((a,b)=>b.set_num.localeCompare(a.set_num));
+    default: return s;
+  }
+}
+
+function renderSets(tab) {
+  const data     = tab==='hp' ? hpSetsData : otherSetsData;
+  const filter   = tab==='hp' ? currentHpFilter : currentOtherFilter;
+  const sortKey  = tab==='hp' ? currentHpSort : currentOtherSort;
+  const container= document.getElementById(tab==='hp'?'hpSets':'otherSets');
+  const statsEl  = document.getElementById(tab==='hp'?'hpStats':'otherStats');
+  const owned    = data.filter(s=>s.status==='owned').length;
+  const building = data.filter(s=>s.status==='in-progress').length;
+  const wishlist = data.filter(s=>s.status==='wishlist').length;
+  statsEl.innerHTML = `
+    <div class="stat"><div class="num">${data.length}</div><div class="label">Total</div></div>
+    <div class="stat"><div class="num">${owned}</div><div class="label">✅ Complete</div></div>
+    <div class="stat"><div class="num">${building}</div><div class="label">🔨 Not Complete</div></div>
+    <div class="stat"><div class="num">${wishlist}</div><div class="label">⭐ Wishlist</div></div>`;
+  let filtered = filter==='all' ? data : data.filter(s=>s.status===filter);
+  filtered = sortData(filtered, sortKey);
+  if (!filtered.length) { container.innerHTML='<div class="empty-state">No sets match this filter</div>'; return; }
+  container.innerHTML = filtered.map(set=>`
+    <div class="set-card ${set.status}" onclick="openLightbox('${tab}','${set.set_num}')">
+      <div class="status-badge ${set.status||'none'}"></div>
+      <div class="img-wrapper"><img src="${set.img||''}" alt="${set.name}" loading="lazy" onerror="this.style.display='none'" /></div>
+      <div class="set-info">
+        <div class="set-name">${set.name}</div>
+        <div class="set-num">#${set.set_num}${set.year?' · '+set.year:''}${set.num_parts?' · '+set.num_parts+' pcs':''}</div>
+        <select onclick="event.stopPropagation()" onchange="updateStatus('${tab}','${set.set_num}',this.value)">
+          <option value="none"        ${set.status==='none'?'selected':''}>📦 Not Owned</option>
+          <option value="owned"       ${set.status==='owned'?'selected':''}>✅ Owned – Complete</option>
+          <option value="in-progress" ${set.status==='in-progress'?'selected':''}>🔨 Owned – Not Complete</option>
+          <option value="wishlist"    ${set.status==='wishlist'?'selected':''}>⭐ Wishlist</option>
+        </select>
+      </div>
+    </div>`).join('');
+}
+
+function changeSort(tab, value) { if(tab==='hp') currentHpSort=value; else currentOtherSort=value; renderSets(tab); }
+
+function updateStatus(tab, setNum, status) {
+  const data = tab==='hp' ? hpSetsData : otherSetsData;
+  const set = data.find(s=>s.set_num===setNum);
+  if (!set) return;
+  set.status = status;
+  if (tab==='hp') { const sv=JSON.parse(localStorage.getItem('hp_statuses')||'{}'); sv[setNum]=status; localStorage.setItem('hp_statuses',JSON.stringify(sv)); }
+  else { localStorage.setItem('other_sets',JSON.stringify(otherSetsData)); }
+  renderSets(tab);
+}
+
+function filterSets(filter, tab, e) {
+  if (tab==='hp') currentHpFilter=filter; else currentOtherFilter=filter;
+  document.getElementById('tab-'+tab).querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderSets(tab);
+}
+
+async function searchSets(query) {
+  const list = document.getElementById('autocompleteList');
+  if (query.length < 3) { list.style.display='none'; return; }
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(async () => {
+    try {
+      const res  = await fetch(`https://rebrickable.com/api/v3/lego/sets/?search=${encodeURIComponent(query)}&page_size=10&key=${API_KEY}`);
+      const data = await res.json();
+      if (!data.results||!data.results.length) { list.style.display='none'; return; }
+      list.innerHTML = data.results.map(s=>`
+        <div class="autocomplete-item" onclick="addOtherSet(${JSON.stringify(s.set_num)},${JSON.stringify(s.name)},${JSON.stringify(s.set_img_url||'')},${s.year||0},${s.num_parts||0})">
+          <img src="${s.set_img_url||''}" onerror="this.style.display='none'" />
+          <div><div class="item-name">${s.name}</div><div class="item-num">#${s.set_num} · ${s.year||''} · ${s.num_parts||'?'} pcs</div></div>
+        </div>`).join('');
+      list.style.display = 'block';
+    } catch(e) { list.style.display='none'; }
+  }, 400);
+}
+
+function addOtherSet(setNum, name, img, year, num_parts) {
+  document.getElementById('autocompleteList').style.display='none';
+  document.getElementById('setSearch').value='';
+  if (otherSetsData.find(s=>s.set_num===setNum)) { alert('Already in your collection!'); return; }
+  otherSetsData.unshift({ set_num:setNum, name, img, year, num_parts, status:'none' });
+  localStorage.setItem('other_sets',JSON.stringify(otherSetsData));
+  renderSets('other');
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.nav-link').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-box')) document.getElementById('autocompleteList').style.display='none';
+});
+
+// LIGHTBOX
+let lbCurrentSet=null, lbCurrentTab=null;
+
+// Generates a consistent fake price from the set number + piece count
+// (same set always shows the same number — looks real, is fake)
+function stubPrice(setNum, numParts) {
+  const seed = setNum.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const base = (numParts || 200);
+  const dollars = Math.round((base * 0.07 + (seed % 40)) * 2) / 2; // rough $0.07/piece + variance
+  return '$' + Math.max(9.99, dollars).toFixed(2);
+}
+
+function openLightbox(tab, setNum) {
+  const data = tab==='hp' ? hpSetsData : otherSetsData;
+  const set  = data.find(s=>s.set_num===setNum);
+  if (!set) return;
+  lbCurrentSet=set; lbCurrentTab=tab;
+  document.getElementById('lbImg').src = set.img||'';
+  document.getElementById('lbImg').alt = set.name;
+  document.getElementById('lbTitle').textContent = set.name;
+  document.getElementById('lbSetNum').textContent = `Set #${set.set_num}${set.year?' · '+set.year:''}`;
+  const fakePrice = stubPrice(set.set_num, set.num_parts);
+  document.getElementById('lbStats').innerHTML = `
+    <div class="lb-stat"><div class="lb-stat-num">${set.year||'—'}</div><div class="lb-stat-label">Year</div></div>
+    <div class="lb-stat"><div class="lb-stat-num">${set.num_parts||'—'}</div><div class="lb-stat-label">Pieces</div></div>
+    <div class="lb-stat lb-minifig-stat"><div class="lb-stat-num">…</div><div class="lb-stat-label">Minifigs</div></div>
+    <div class="lb-stat lb-theme-stat"><div class="lb-stat-num" style="font-size:0.7rem;padding-top:4px">…</div><div class="lb-stat-label">Theme</div></div>
+    <div class="lb-stat lb-price-stat" title="Lowest current price (BrickOwl) — stubbed data"><div class="lb-stat-num" style="font-size:0.95rem;">${fakePrice}</div><div class="lb-stat-label">From (US) 🛒</div></div>`;
+  document.getElementById('lbDetailArea').innerHTML='<div class="lb-loading-detail">Summoning details...</div>';
+  document.getElementById('lbLink').href=`https://rebrickable.com/sets/${set.set_num}/`;
+  lbUpdateStatusButtons(set.status);
+  document.getElementById('lbOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  fetchLightboxDetails(set.set_num);
+}
+
+async function fetchLightboxDetails(setNum) {
+  try {
+    const [detailRes,minifigRes] = await Promise.all([
+      fetch(`https://rebrickable.com/api/v3/lego/sets/${setNum}/?key=${API_KEY}`),
+      fetch(`https://rebrickable.com/api/v3/lego/sets/${setNum}/minifigs/?key=${API_KEY}`)
+    ]);
+    const detail=await detailRes.json(), minifigs=await minifigRes.json();
+    const minifigCount = minifigs.count ?? minifigs.results?.length ?? 0;
+    const themeName = detail.theme_id ? await fetchThemeName(detail.theme_id) : '—';
+    const minStat   = document.querySelector('.lb-minifig-stat .lb-stat-num');
+    const themeStat = document.querySelector('.lb-theme-stat .lb-stat-num');
+    if (minStat)   minStat.textContent   = minifigCount;
+    if (themeStat) themeStat.textContent = themeName;
+    let minifigHTML = '';
+    if (minifigs.results && minifigs.results.length > 0) {
+      minifigHTML = `<hr class="lb-divider"><div class="lb-section-label">Minifigures (${minifigCount})</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px;">
+          ${minifigs.results.map(m=>`
+            <div style="text-align:center;width:64px;">
+              <img src="${m.set_img_url||''}" onerror="this.style.display='none'" style="width:56px;height:56px;object-fit:contain;background:#fff;border-radius:6px;padding:3px;" />
+              <div style="font-size:0.72rem;color:var(--th-text);margin-top:5px;line-height:1.3;font-weight:500;">${m.set_name}</div>
+            </div>`).join('')}
+        </div>`;
+    }
+    document.getElementById('lbDetailArea').innerHTML = minifigHTML || '';
+  } catch(e) { document.getElementById('lbDetailArea').innerHTML=''; }
+}
+
+const themeCache = {};
+async function fetchThemeName(themeId) {
+  if (themeCache[themeId]) return themeCache[themeId];
+  try {
+    const res=await fetch(`https://rebrickable.com/api/v3/lego/themes/${themeId}/?key=${API_KEY}`);
+    const data=await res.json();
+    themeCache[themeId]=data.name||'—'; return themeCache[themeId];
+  } catch { return '—'; }
+}
+
+function lbSetStatus(status) {
+  if (!lbCurrentSet) return;
+  lbCurrentSet.status=status; lbUpdateStatusButtons(status);
+  if (lbCurrentTab==='hp') { const sv=JSON.parse(localStorage.getItem('hp_statuses')||'{}'); sv[lbCurrentSet.set_num]=status; localStorage.setItem('hp_statuses',JSON.stringify(sv)); }
+  else { localStorage.setItem('other_sets',JSON.stringify(otherSetsData)); }
+  renderSets(lbCurrentTab);
+}
+
+function lbUpdateStatusButtons(status) {
+  document.getElementById('lbBtnNone').className     = 'lb-status-btn'+(status==='none'        ?' active-none'    :'');
+  document.getElementById('lbBtnOwned').className    = 'lb-status-btn'+(status==='owned'       ?' active-owned'   :'');
+  document.getElementById('lbBtnProgress').className = 'lb-status-btn'+(status==='in-progress' ?' active-progress':'');
+  document.getElementById('lbBtnWishlist').className = 'lb-status-btn'+(status==='wishlist'    ?' active-wishlist':'');
+}
+
+function closeLightbox() { document.getElementById('lbOverlay').classList.remove('open'); document.body.style.overflow=''; lbCurrentSet=null; lbCurrentTab=null; }
+function closeLightboxOnOverlay(e) { if (e.target===document.getElementById('lbOverlay')) closeLightbox(); }
+document.addEventListener('keydown', e => { if (e.key==='Escape') { if (document.getElementById('lbOverlay').classList.contains('open')) closeLightbox(); } });
+
+renderSets('other');
+</script>
+</body>
+</html>
