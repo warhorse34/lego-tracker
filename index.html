@@ -257,7 +257,16 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
 .lb-status-btn.active-owned    { border-color: var(--owned-color);   background: rgba(76,175,80,0.12);   color: #81c784; }
 .lb-status-btn.active-progress { border-color: var(--th-primary);   background: var(--th-primary-glow); color: var(--th-primary); }
 .lb-status-btn.active-wishlist { border-color: var(--wishlist-color);background: rgba(192,132,252,0.12);color: #d8b4fe; }
-.lb-link { display: inline-block; font-size: 0.8rem; color: var(--th-primary-dk); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s, color 0.15s; }
+/* STAR RATINGS */
+.lb-rating-row { display: flex; flex-direction: column; gap: 12px; margin-bottom: 18px; }
+.lb-rating-item { display: flex; align-items: center; justify-content: space-between; }
+.lb-rating-label { font-family: 'Cinzel', serif; font-size: 0.72rem; color: var(--th-text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+.stars { display: flex; gap: 4px; }
+.star { font-size: 1.3rem; cursor: pointer; color: var(--th-dark3); transition: color 0.15s, transform 0.1s; line-height: 1; filter: drop-shadow(0 0 0px transparent); }
+.star:hover, .star.active { color: var(--th-primary); filter: drop-shadow(0 0 6px var(--th-primary-glow)); transform: scale(1.15); }
+.star.active { transform: scale(1); }
+.stars:hover .star { color: var(--th-primary); }
+.stars .star:hover ~ .star { color: var(--th-dark3); filter: none; transform: scale(1); } font-size: 0.8rem; color: var(--th-primary-dk); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.15s, color 0.15s; }
 .lb-link:hover { color: var(--th-primary); border-bottom-color: var(--th-primary); }
 .lb-loading-detail { font-family: 'IM Fell English', serif; font-style: italic; font-size: 0.85rem; color: var(--th-text-muted); text-align: center; padding: 8px 0; }
 
@@ -366,6 +375,9 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
 
 <div class="tab-panel active" id="tab-hp">
   <div class="stats-bar" id="hpStats"></div>
+  <div class="search-box" style="margin-bottom:12px;">
+    <input type="text" id="hpSearch" placeholder="🔍 Search by name, set number, or year..." oninput="searchHp(this.value)" autocomplete="off" />
+  </div>
   <div class="controls-row">
     <div class="filter-bar">
       <button class="filter-btn active" onclick="filterSets('all','hp',event)">All</button>
@@ -374,6 +386,10 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
       <button class="filter-btn" onclick="filterSets('wishlist','hp',event)">⭐ Wishlist</button>
       <button class="filter-btn" onclick="filterSets('none','hp',event)">📦 Not Owned</button>
     </div>
+    <span class="sort-label">Year:</span>
+    <select class="sort-select" id="hpYearFilter" onchange="filterYear(this.value)">
+      <option value="all">All Years</option>
+    </select>
     <span class="sort-label">Sort:</span>
     <select class="sort-select" onchange="changeSort('hp', this.value)">
       <option value="year_asc">Year ↑</option>
@@ -439,6 +455,29 @@ header p { font-family: 'IM Fell English', serif; font-style: italic; font-size:
         <button class="lb-status-btn" id="lbBtnOwned"    onclick="lbSetStatus('owned')">✅<br>Owned – Complete</button>
         <button class="lb-status-btn" id="lbBtnProgress" onclick="lbSetStatus('in-progress')">🔨<br>Owned – Not Complete</button>
         <button class="lb-status-btn" id="lbBtnWishlist" onclick="lbSetStatus('wishlist')">⭐<br>Wishlist</button>
+      </div>
+      <hr class="lb-divider">
+      <div class="lb-rating-row">
+        <div class="lb-rating-item">
+          <span class="lb-rating-label">My Rating</span>
+          <div class="stars" id="lbStarsRating">
+            <span class="star" onclick="lbSetRating('rating',1)">★</span>
+            <span class="star" onclick="lbSetRating('rating',2)">★</span>
+            <span class="star" onclick="lbSetRating('rating',3)">★</span>
+            <span class="star" onclick="lbSetRating('rating',4)">★</span>
+            <span class="star" onclick="lbSetRating('rating',5)">★</span>
+          </div>
+        </div>
+        <div class="lb-rating-item">
+          <span class="lb-rating-label">Difficulty</span>
+          <div class="stars" id="lbStarsDifficulty">
+            <span class="star" onclick="lbSetRating('difficulty',1)">★</span>
+            <span class="star" onclick="lbSetRating('difficulty',2)">★</span>
+            <span class="star" onclick="lbSetRating('difficulty',3)">★</span>
+            <span class="star" onclick="lbSetRating('difficulty',4)">★</span>
+            <span class="star" onclick="lbSetRating('difficulty',5)">★</span>
+          </div>
+        </div>
       </div>
       <a id="lbLink" class="lb-link" href="#" target="_blank">View on Rebrickable ↗</a>
     </div>
@@ -707,6 +746,8 @@ let hpSetsData = [];
 let otherSetsData = JSON.parse(localStorage.getItem('other_sets') || '[]');
 let currentHpFilter = 'all', currentOtherFilter = 'all';
 let currentHpSort = 'year_desc', currentOtherSort = 'year_desc';
+let currentHpSearch = '';
+let currentHpYear = 'all';
 let searchTimeout = null;
 let searchResultsCache = {};
 
@@ -727,6 +768,10 @@ async function loadHarryPotterSets() {
     }
     const saved = JSON.parse(localStorage.getItem('hp_statuses') || '{}');
     hpSetsData = allSets.map(s => ({ set_num:s.set_num, name:s.name, year:s.year, num_parts:s.num_parts||0, img:s.set_img_url, status:saved[s.set_num]||'none' }));
+    // Populate year dropdown with all unique years, newest first
+    const years = [...new Set(hpSetsData.map(s=>s.year).filter(Boolean))].sort((a,b)=>b-a);
+    const sel = document.getElementById('hpYearFilter');
+    years.forEach(y => { const o=document.createElement('option'); o.value=y; o.textContent=y; sel.appendChild(o); });
     renderSets('hp');
   } catch(e) {
     container.innerHTML = `<div class="loading">❌ Error loading sets.<br><small>${e.message}</small></div>`;
@@ -752,6 +797,7 @@ function renderSets(tab) {
   const data     = tab==='hp' ? hpSetsData : otherSetsData;
   const filter   = tab==='hp' ? currentHpFilter : currentOtherFilter;
   const sortKey  = tab==='hp' ? currentHpSort : currentOtherSort;
+  const search   = tab==='hp' ? currentHpSearch.toLowerCase().trim() : '';
   const container= document.getElementById(tab==='hp'?'hpSets':'otherSets');
   const statsEl  = document.getElementById(tab==='hp'?'hpStats':'otherStats');
   const owned    = data.filter(s=>s.status==='owned').length;
@@ -763,6 +809,16 @@ function renderSets(tab) {
     <div class="stat"><div class="num">${building}</div><div class="label">🔨 Not Complete</div></div>
     <div class="stat"><div class="num">${wishlist}</div><div class="label">⭐ Wishlist</div></div>`;
   let filtered = filter==='all' ? data : data.filter(s=>s.status===filter);
+  if (tab==='hp' && currentHpYear !== 'all') {
+    filtered = filtered.filter(s => String(s.year) === currentHpYear);
+  }
+  if (search) {
+    filtered = filtered.filter(s =>
+      s.name.toLowerCase().includes(search) ||
+      s.set_num.toLowerCase().includes(search) ||
+      String(s.year).includes(search)
+    );
+  }
   filtered = sortData(filtered, sortKey);
   if (!filtered.length) { container.innerHTML='<div class="empty-state">No sets match this filter</div>'; return; }
   container.innerHTML = filtered.map(set=>`
@@ -783,6 +839,9 @@ function renderSets(tab) {
 }
 
 function changeSort(tab, value) { if(tab==='hp') currentHpSort=value; else currentOtherSort=value; renderSets(tab); }
+
+function searchHp(value) { currentHpSearch = value; renderSets('hp'); }
+function filterYear(value) { currentHpYear = value; renderSets('hp'); }
 
 function updateStatus(tab, setNum, status) {
   const data = tab==='hp' ? hpSetsData : otherSetsData;
@@ -875,6 +934,7 @@ function openLightbox(tab, setNum) {
   document.getElementById('lbDetailArea').innerHTML='<div class="lb-loading-detail">Summoning details...</div>';
   document.getElementById('lbLink').href=`https://rebrickable.com/sets/${set.set_num}/`;
   lbUpdateStatusButtons(set.status);
+  lbLoadRatings(set.set_num);
   document.getElementById('lbOverlay').classList.add('open');
   document.body.style.overflow='hidden';
   fetchLightboxDetails(set.set_num);
@@ -898,6 +958,7 @@ function openLightboxPreview(s) {
   document.getElementById('lbDetailArea').innerHTML='<div class="lb-loading-detail">Summoning details...</div>';
   document.getElementById('lbLink').href=`https://rebrickable.com/sets/${lbPendingNewSet.set_num}/`;
   lbUpdateStatusButtons('none');
+  lbLoadRatings(lbPendingNewSet.set_num);
   document.getElementById('lbOverlay').classList.add('open');
   document.body.style.overflow='hidden';
   fetchLightboxDetails(lbPendingNewSet.set_num);
@@ -964,6 +1025,31 @@ function lbUpdateStatusButtons(status) {
   document.getElementById('lbBtnOwned').className    = 'lb-status-btn'+(status==='owned'       ?' active-owned'   :'');
   document.getElementById('lbBtnProgress').className = 'lb-status-btn'+(status==='in-progress' ?' active-progress':'');
   document.getElementById('lbBtnWishlist').className = 'lb-status-btn'+(status==='wishlist'    ?' active-wishlist':'');
+}
+
+function getRatings() { return JSON.parse(localStorage.getItem('set_ratings') || '{}'); }
+function saveRatings(r) { localStorage.setItem('set_ratings', JSON.stringify(r)); }
+
+function lbSetRating(type, value) {
+  if (!lbCurrentSet) return;
+  const r = getRatings();
+  if (!r[lbCurrentSet.set_num]) r[lbCurrentSet.set_num] = {};
+  // Toggle off if clicking the same value again
+  r[lbCurrentSet.set_num][type] = r[lbCurrentSet.set_num][type] === value ? 0 : value;
+  saveRatings(r);
+  lbUpdateRatingUI(r[lbCurrentSet.set_num]);
+}
+
+function lbUpdateRatingUI(data) {
+  const rating     = data?.rating     || 0;
+  const difficulty = data?.difficulty || 0;
+  document.querySelectorAll('#lbStarsRating .star').forEach((s,i)     => s.classList.toggle('active', i < rating));
+  document.querySelectorAll('#lbStarsDifficulty .star').forEach((s,i) => s.classList.toggle('active', i < difficulty));
+}
+
+function lbLoadRatings(setNum) {
+  const r = getRatings();
+  lbUpdateRatingUI(r[setNum] || {});
 }
 
 function closeLightbox() { document.getElementById('lbOverlay').classList.remove('open'); document.body.style.overflow=''; lbCurrentSet=null; lbCurrentTab=null; lbPendingNewSet=null; }
