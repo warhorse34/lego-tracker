@@ -708,6 +708,7 @@ let otherSetsData = JSON.parse(localStorage.getItem('other_sets') || '[]');
 let currentHpFilter = 'all', currentOtherFilter = 'all';
 let currentHpSort = 'year_desc', currentOtherSort = 'year_desc';
 let searchTimeout = null;
+let searchResultsCache = {};
 
 loadHarryPotterSets();
 
@@ -809,8 +810,10 @@ async function searchSets(query) {
       const res  = await fetch(`https://rebrickable.com/api/v3/lego/sets/?search=${encodeURIComponent(query)}&page_size=10&key=${API_KEY}`);
       const data = await res.json();
       if (!data.results||!data.results.length) { list.style.display='none'; return; }
+      searchResultsCache = {};
+      data.results.forEach(s => { searchResultsCache[s.set_num] = s; });
       list.innerHTML = data.results.map(s=>`
-        <div class="autocomplete-item" onclick="addOtherSet(${JSON.stringify(s.set_num)},${JSON.stringify(s.name)},${JSON.stringify(s.set_img_url||'')},${s.year||0},${s.num_parts||0})">
+        <div class="autocomplete-item" onclick="addOtherSet('${s.set_num.replace(/'/g,"\\'")}')">
           <img src="${s.set_img_url||''}" onerror="this.style.display='none'" />
           <div><div class="item-name">${s.name}</div><div class="item-num">#${s.set_num} · ${s.year||''} · ${s.num_parts||'?'} pcs</div></div>
         </div>`).join('');
@@ -819,13 +822,16 @@ async function searchSets(query) {
   }, 400);
 }
 
-function addOtherSet(setNum, name, img, year, num_parts) {
+function addOtherSet(setNum) {
+  const s = searchResultsCache[setNum];
+  if (!s) return;
   document.getElementById('autocompleteList').style.display='none';
   document.getElementById('setSearch').value='';
-  if (otherSetsData.find(s=>s.set_num===setNum)) { alert('Already in your collection!'); return; }
-  otherSetsData.unshift({ set_num:setNum, name, img, year, num_parts, status:'none' });
-  localStorage.setItem('other_sets',JSON.stringify(otherSetsData));
-  renderSets('other');
+  if (otherSetsData.find(x=>x.set_num===setNum)) {
+    openLightbox('other', setNum);
+    return;
+  }
+  openLightboxPreview(s);
 }
 
 function switchTab(tab, el) {
@@ -840,7 +846,7 @@ document.addEventListener('click', e => {
 });
 
 // LIGHTBOX
-let lbCurrentSet=null, lbCurrentTab=null;
+let lbCurrentSet=null, lbCurrentTab=null, lbPendingNewSet=null;
 
 // Generates a consistent placeholder price from set number + piece count
 function stubPrice(setNum, numParts) {
@@ -872,6 +878,29 @@ function openLightbox(tab, setNum) {
   document.getElementById('lbOverlay').classList.add('open');
   document.body.style.overflow='hidden';
   fetchLightboxDetails(set.set_num);
+}
+
+function openLightboxPreview(s) {
+  lbPendingNewSet = { set_num:s.set_num, name:s.name, img:s.set_img_url||'', year:s.year||0, num_parts:s.num_parts||0, status:'none' };
+  lbCurrentTab = 'other';
+  lbCurrentSet = null;
+  document.getElementById('lbImg').src = lbPendingNewSet.img;
+  document.getElementById('lbImg').alt = lbPendingNewSet.name;
+  document.getElementById('lbTitle').textContent = lbPendingNewSet.name;
+  document.getElementById('lbSetNum').textContent = `Set #${lbPendingNewSet.set_num}${lbPendingNewSet.year?' · '+lbPendingNewSet.year:''}`;
+  const fakePrice = stubPrice(lbPendingNewSet.set_num, lbPendingNewSet.num_parts);
+  document.getElementById('lbStats').innerHTML = `
+    <div class="lb-stat"><div class="lb-stat-num">${lbPendingNewSet.year||'—'}</div><div class="lb-stat-label">Year</div></div>
+    <div class="lb-stat"><div class="lb-stat-num">${lbPendingNewSet.num_parts||'—'}</div><div class="lb-stat-label">Pieces</div></div>
+    <div class="lb-stat lb-minifig-stat"><div class="lb-stat-num">…</div><div class="lb-stat-label">Minifigs</div></div>
+    <div class="lb-stat lb-theme-stat"><div class="lb-stat-num" style="font-size:0.7rem;padding-top:4px">…</div><div class="lb-stat-label">Theme</div></div>
+    <div class="lb-stat lb-price-stat" title="Placeholder price — not real market data"><div class="lb-stat-num" style="font-size:0.95rem;">${fakePrice}</div><div class="lb-stat-label">From (US) 🛒</div></div>`;
+  document.getElementById('lbDetailArea').innerHTML='<div class="lb-loading-detail">Summoning details...</div>';
+  document.getElementById('lbLink').href=`https://rebrickable.com/sets/${lbPendingNewSet.set_num}/`;
+  lbUpdateStatusButtons('none');
+  document.getElementById('lbOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  fetchLightboxDetails(lbPendingNewSet.set_num);
 }
 
 async function fetchLightboxDetails(setNum) {
@@ -913,6 +942,16 @@ async function fetchThemeName(themeId) {
 }
 
 function lbSetStatus(status) {
+  if (lbPendingNewSet && !lbCurrentSet) {
+    lbPendingNewSet.status = status;
+    otherSetsData.unshift(lbPendingNewSet);
+    localStorage.setItem('other_sets', JSON.stringify(otherSetsData));
+    lbCurrentSet = lbPendingNewSet;
+    lbPendingNewSet = null;
+    lbUpdateStatusButtons(status);
+    renderSets('other');
+    return;
+  }
   if (!lbCurrentSet) return;
   lbCurrentSet.status=status; lbUpdateStatusButtons(status);
   if (lbCurrentTab==='hp') { const sv=JSON.parse(localStorage.getItem('hp_statuses')||'{}'); sv[lbCurrentSet.set_num]=status; localStorage.setItem('hp_statuses',JSON.stringify(sv)); }
@@ -927,7 +966,7 @@ function lbUpdateStatusButtons(status) {
   document.getElementById('lbBtnWishlist').className = 'lb-status-btn'+(status==='wishlist'    ?' active-wishlist':'');
 }
 
-function closeLightbox() { document.getElementById('lbOverlay').classList.remove('open'); document.body.style.overflow=''; lbCurrentSet=null; lbCurrentTab=null; }
+function closeLightbox() { document.getElementById('lbOverlay').classList.remove('open'); document.body.style.overflow=''; lbCurrentSet=null; lbCurrentTab=null; lbPendingNewSet=null; }
 function closeLightboxOnOverlay(e) { if (e.target===document.getElementById('lbOverlay')) closeLightbox(); }
 document.addEventListener('keydown', e => { if (e.key==='Escape') { if (document.getElementById('lbOverlay').classList.contains('open')) closeLightbox(); } });
 
