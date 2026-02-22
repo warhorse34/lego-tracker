@@ -905,7 +905,7 @@ document.addEventListener('click', e => {
 });
 
 // LIGHTBOX
-let lbCurrentSet=null, lbCurrentTab=null, lbPendingNewSet=null;
+let lbCurrentSet=null, lbCurrentTab=null, lbPendingNewSet=null, lbHistoryPushed=false;
 
 // Generates a consistent placeholder price from set number + piece count
 function stubPrice(setNum, numParts) {
@@ -937,6 +937,8 @@ function openLightbox(tab, setNum) {
   lbLoadRatings(set.set_num);
   document.getElementById('lbOverlay').classList.add('open');
   document.body.style.overflow='hidden';
+  history.pushState({ lightbox: true }, '');
+  lbHistoryPushed = true;
   fetchLightboxDetails(set.set_num);
 }
 
@@ -961,6 +963,8 @@ function openLightboxPreview(s) {
   lbLoadRatings(lbPendingNewSet.set_num);
   document.getElementById('lbOverlay').classList.add('open');
   document.body.style.overflow='hidden';
+  history.pushState({ lightbox: true }, '');
+  lbHistoryPushed = true;
   fetchLightboxDetails(lbPendingNewSet.set_num);
 }
 
@@ -1052,9 +1056,23 @@ function lbLoadRatings(setNum) {
   lbUpdateRatingUI(r[setNum] || {});
 }
 
-function closeLightbox() { document.getElementById('lbOverlay').classList.remove('open'); document.body.style.overflow=''; lbCurrentSet=null; lbCurrentTab=null; lbPendingNewSet=null; }
+function closeLightbox() {
+  document.getElementById('lbOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  lbCurrentSet=null; lbCurrentTab=null; lbPendingNewSet=null;
+  if (lbHistoryPushed) { lbHistoryPushed=false; history.back(); }
+}
 function closeLightboxOnOverlay(e) { if (e.target===document.getElementById('lbOverlay')) closeLightbox(); }
 document.addEventListener('keydown', e => { if (e.key==='Escape') { if (document.getElementById('lbOverlay').classList.contains('open')) closeLightbox(); } });
+// Back button closes lightbox instead of leaving the page
+window.addEventListener('popstate', () => {
+  if (lbHistoryPushed) {
+    lbHistoryPushed = false;
+    document.getElementById('lbOverlay').classList.remove('open');
+    document.body.style.overflow='';
+    lbCurrentSet=null; lbCurrentTab=null; lbPendingNewSet=null;
+  }
+});
 
 renderSets('other');
 </script>
